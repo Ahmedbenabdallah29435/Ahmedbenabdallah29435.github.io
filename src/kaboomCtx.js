@@ -1,3 +1,5 @@
+import { scaleFactor } from "./constants";
+
 export const k = kaboom({
   global: false,
   touchToMouse: true,
