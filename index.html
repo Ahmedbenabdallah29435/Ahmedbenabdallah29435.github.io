@@ -8,10 +8,10 @@
   </head>
   <body>
     <style>
- @font-face {
-  font-family: "Monogram";
-  src: url("/monogram.ttf") format("truetype");
-}
+      @font-face {
+        font-family: "Monogram";
+        src: url("/monogram.ttf") format("truetype");
+      }
 
 
       body {
@@ -107,7 +107,11 @@
       <canvas id="game"></canvas>
     </div>
     <script type="module" src="src/main.js"></script>
-
+    <script type="module">
+      import * as kaboom from "https://cdn.skypack.dev/kaboom";
+      window.kaboom = kaboom; // Make kaboom globally accessible
+    </script>
+    
     
   </body>
 </html>
