@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  base: "/Ahmedbenabdallah29435.github.io/", // Update this line
+  base: "/ahmedbenabdallah29435.github.io/", // Ensure it's in lowercase
   build: {
     minify: "terser",
   },
