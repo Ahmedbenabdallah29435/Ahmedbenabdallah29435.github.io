@@ -34,7 +34,7 @@ k.scene("menu", () => {
   ]);
 
   k.add([
-    k.text("🎮 Ahmed's 2D Portfolio 🎮", { size: 48 }),
+    k.text("🎮2D Portfolio🎮", { size: 48 }),
     k.pos(k.width() / 2, 60),
     k.anchor("center"),
   ]);
