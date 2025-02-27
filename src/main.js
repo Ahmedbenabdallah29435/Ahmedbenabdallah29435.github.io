@@ -1,6 +1,6 @@
-import { dialogueData, scaleFactor } from "./constants.js"; // Add .js extension
-import { k } from "./kaboomCtx.js"; // Add .js extension
-import { displayDialogue, setCamScale } from "./utils.js"; // Add .js extension
+import { dialogueData, scaleFactor } from "./constants.js";  // Add .js extension
+import { k } from "./kaboomCtx.js";  // Add .js extension
+import { displayDialogue, setCamScale } from "./utils.js";  // Add .js extension
 
 
 k.loadSprite("spritesheet", "./spritesheet.png", {
