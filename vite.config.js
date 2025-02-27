@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  base: "/ahmedbenabdallah29435.github.io/", // Ensure it's in lowercase
+  base: "/", // Should be "/" for GitHub Pages at root level
   build: {
     minify: "terser",
   },
