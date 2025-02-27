@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ahmed Ben Abdallah predemo</title>
+    <!-- <script type="module">
+      import * as kaboom from "https://cdn.skypack.dev/kaboom";
+      window.kaboom = kaboom;  // Make kaboom globally available
+    </script>
+     -->
+  </head>
+  <body>
+    <style>
+     @font-face {
+        font-family: "Monogram";
+        src: url("/monogram.ttf") format("truetype");
+      }
+
+
+      body {
+        font-family: monogram, monospace;
+        font-size: 2rem;
+        overflow: hidden;
+      }
+
+      #app {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+
+      #textbox {
+        position: absolute;
+        left: 10%;
+        right: 10%;
+        bottom: 2vh;
+        min-height: 10vh;
+        background: white;
+        border-radius: 3px;
+        outline-style: solid;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        align-items: flex-start;
+        word-spacing: 0.2rem;
+        filter: drop-shadow(0 0 0.75rem rgb(112, 112, 112));
+        /* overflow: auto; */
+      }
+
+      .ui-text {
+        margin: 0;
+        user-select: none;
+      }
+
+      .ui-close-btn {
+        font-family: monogram, monospace;
+        border-style: none;
+        border-radius: 3px;
+        padding: 1rem;
+        font-size: inherit;
+      }
+
+      .btn-container {
+        align-self: flex-end;
+        margin-top: 1rem;
+      }
+
+      .note {
+        position: absolute;
+        left: 5%;
+        top: 1vh;
+        display: flex;
+        flex-direction: column;
+        color: rgb(0, 0, 0);
+      }
+
+    #music-toggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 1rem;
+      border-radius: 5px;
+    }
+
+    #music-toggle:hover {
+      background: #ff1a1a;
+    }
+
+    </style>
+    <div id="app">
+      <div>
+        <button id="music-toggle" class="ui-close-btn">Music Off</button>
+
+        <div id="textbox-container" style="display: none">
+          <div id="textbox">
+            <p id="dialogue" class="ui-text"></p>
+            <div class="btn-container">
+              <button id="close" class="ui-close-btn">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <canvas id="game"></canvas>
+    </div>
+    <script type="module" src="src/main.js"></script>
+   
+    
+    
+  </body>
+</html>
