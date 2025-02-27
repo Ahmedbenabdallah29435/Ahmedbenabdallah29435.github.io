@@ -1,4 +1,4 @@
-import kaboom from "kaboom";
+import kaboom from 'kaboom'; // Importing Kaboom from the installed npm package
 import { scaleFactor } from "./constants";
 
 export const k = kaboom({
