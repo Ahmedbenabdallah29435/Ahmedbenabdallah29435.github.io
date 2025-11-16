@@ -28,103 +28,291 @@ k.setBackground(k.Color.fromHex("#acacac"));
 
 
 k.scene("menu", () => {
-  // Background and Title
-  k.add([
-    k.rect(k.width(), k.height()), 
-    k.color(30, 30, 30), // Dark background
+  // 🎨 Dynamic sizing based on screen width for mobile responsiveness
+  const isMobile = k.width() < 768;
+  const titleSize = isMobile ? Math.max(32, k.width() * 0.08) : 56;
+  const subtitleSize = isMobile ? Math.max(16, k.width() * 0.035) : 24;
+  const buttonSize = isMobile ? Math.max(24, k.width() * 0.055) : 36;
+  const socialSize = isMobile ? Math.max(20, k.width() * 0.045) : 30;
+
+  // 🌟 Animated Gradient Background
+  const bg1 = k.add([
+    k.rect(k.width(), k.height()),
+    k.color(20, 20, 40), // Deep blue-purple
     k.pos(0, 0),
+    k.z(-2),
   ]);
 
-  k.add([
-    k.text("🎮2D Portfolio🎮", { size: 48 }),
+  const bg2 = k.add([
+    k.rect(k.width(), k.height()),
+    k.color(40, 20, 60), // Purple accent
+    k.pos(0, 0),
+    k.opacity(0.3),
+    k.z(-1),
+  ]);
+
+  // Animate background color shift
+  k.loop(3, () => {
+    k.tween(0.3, 0.6, 2, (val) => bg2.opacity = val, k.easings.easeInOutSine, () => {
+      k.tween(0.6, 0.3, 2, (val) => bg2.opacity = val, k.easings.easeInOutSine);
+    });
+  });
+
+  // ✨ Particle System for Background
+  function createParticles() {
+    for (let i = 0; i < 30; i++) {
+      const particle = k.add([
+        k.circle(Math.random() * 3 + 1),
+        k.pos(Math.random() * k.width(), Math.random() * k.height()),
+        k.color(Math.random() * 100 + 155, Math.random() * 100 + 155, 255),
+        k.opacity(Math.random() * 0.5 + 0.2),
+        k.z(-1),
+        { speed: Math.random() * 20 + 10 }
+      ]);
+
+      // Floating animation
+      k.loop(Math.random() * 2 + 2, () => {
+        const newY = particle.pos.y + particle.speed;
+        const duration = Math.random() * 3 + 2;
+        k.tween(particle.pos.y, newY > k.height() ? -20 : newY, duration,
+          (val) => particle.pos.y = val, k.easings.linear);
+      });
+    }
+  }
+
+  createParticles();
+
+  // 🎮 Title with shadow effect
+  const titleShadow = k.add([
+    k.text("🎮2D Portfolio🎮", { size: titleSize }),
+    k.pos(k.width() / 2 + 3, 63),
+    k.anchor("center"),
+    k.color(0, 0, 0),
+    k.opacity(0.5),
+  ]);
+
+  const title = k.add([
+    k.text("🎮2D Portfolio🎮", { size: titleSize }),
     k.pos(k.width() / 2, 60),
     k.anchor("center"),
+    k.color(255, 255, 255),
   ]);
 
-  k.add([
+  // Title pulse animation
+  k.loop(2, () => {
+    k.tween(1, 1.05, 1, (val) => {
+      title.scale = k.vec2(val, val);
+      titleShadow.scale = k.vec2(val, val);
+    }, k.easings.easeInOutSine, () => {
+      k.tween(1.05, 1, 1, (val) => {
+        title.scale = k.vec2(val, val);
+        titleShadow.scale = k.vec2(val, val);
+      }, k.easings.easeInOutSine);
+    });
+  });
+
+  const subtitleY = isMobile ? 120 : 150;
+  const subtitle = k.add([
     k.text(
       "Learn about me through a mini 2D game!\nInteract with 3 objects to unlock\nthe real portfolio link!",
-      { size: 20, align: "center", width: 600 }
+      { size: subtitleSize, align: "center", width: isMobile ? k.width() * 0.9 : 600 }
     ),
-    k.pos(k.width() / 2, 140),
+    k.pos(k.width() / 2, subtitleY),
     k.anchor("center"),
+    k.color(200, 200, 255),
   ]);
 
-  // 🎮 Start Button
+  // 🎮 Enhanced Start Button with border and background
+  const startBtnY = isMobile ? 210 : 240;
+
+  const startBtnBg = k.add([
+    k.rect(isMobile ? k.width() * 0.7 : 380, isMobile ? 70 : 80),
+    k.pos(k.width() / 2, startBtnY),
+    k.anchor("center"),
+    k.color(70, 130, 255), // Vibrant blue
+    k.area(),
+    k.z(1),
+    "start-btn-bg",
+  ]);
+
+  const startBtnBorder = k.add([
+    k.rect(isMobile ? k.width() * 0.7 + 6 : 386, isMobile ? 76 : 86),
+    k.pos(k.width() / 2, startBtnY),
+    k.anchor("center"),
+    k.color(150, 200, 255), // Light blue border
+    k.z(0),
+  ]);
+
   const startBtn = k.add([
-    k.text("▶ Start 2D Portfolio", { size: 32 }),
-    k.pos(k.width() / 2, 220),
+    k.text("▶ Start 2D Portfolio", { size: buttonSize }),
+    k.pos(k.width() / 2, startBtnY),
     k.anchor("center"),
     k.area(),
     k.color(255, 255, 255),
+    k.z(2),
     "start-btn",
   ]);
 
-  startBtn.onClick(() => k.go("main"));
+  startBtn.onClick(() => {
+    k.play("interaction-sound");
+    k.go("main");
+  });
 
-  // 🔥 Animated Start Button
-  function animateStartButton() {
-    k.loop(1, () => {
-      k.tween(1, 1, 0.9, (val) => startBtn.scale = k.vec2(val, val), k.easings.easeInOutSine, () => {
-        k.tween(1.2, 1, 0.9, (val) => startBtn.scale = k.vec2(val, val), k.easings.easeInOutSine);
-      });
+  startBtnBg.onClick(() => k.go("main"));
 
-      k.tween(0.5, 1, 0.6, (val) => startBtn.opacity = val, k.easings.easeInOutSine, () => {
-        k.tween(1, 0.5, 0.6, (val) => startBtn.opacity = val, k.easings.easeInOutSine);
-      });
+  // 🔥 Enhanced Start Button Animation
+  k.loop(1.5, () => {
+    k.tween(1, 1.08, 0.75, (val) => {
+      startBtn.scale = k.vec2(val, val);
+      startBtnBg.scale = k.vec2(val, val);
+      startBtnBorder.scale = k.vec2(val * 1.02, val * 1.02);
+    }, k.easings.easeInOutSine, () => {
+      k.tween(1.08, 1, 0.75, (val) => {
+        startBtn.scale = k.vec2(val, val);
+        startBtnBg.scale = k.vec2(val, val);
+        startBtnBorder.scale = k.vec2(val * 1.02, val * 1.02);
+      }, k.easings.easeInOutSine);
     });
+
+    // Color pulse
+    k.tween(70, 100, 0.75, (val) => {
+      startBtnBg.color.r = val;
+      startBtnBg.color.g = val + 60;
+    }, k.easings.easeInOutSine, () => {
+      k.tween(100, 70, 0.75, (val) => {
+        startBtnBg.color.r = val;
+        startBtnBg.color.g = val + 60;
+      }, k.easings.easeInOutSine);
+    });
+  });
+
+  // Hover effect for start button
+  startBtn.onHover(() => {
+    k.tween(startBtnBg.color.r, 120, 0.2, (val) => startBtnBg.color.r = val);
+    k.tween(startBtnBg.color.g, 180, 0.2, (val) => startBtnBg.color.g = val);
+  });
+
+  startBtn.onHoverEnd(() => {
+    k.tween(startBtnBg.color.r, 70, 0.2, (val) => startBtnBg.color.r = val);
+    k.tween(startBtnBg.color.g, 130, 0.2, (val) => startBtnBg.color.g = val);
+  });
+
+  // 🕹️ Hover Character (Moves to hovered buttons) - Only on desktop
+  let hoverCharacter = null;
+  if (!isMobile) {
+    hoverCharacter = k.add([
+      k.sprite("spritesheet", { anim: "idle-down" }),
+      k.pos(k.width() / 2 - 200, startBtnY),
+      k.anchor("center"),
+      k.scale(1.4),
+      k.z(3),
+    ]);
   }
 
-  animateStartButton(); // Start infinite animation loop
+  // 📌 Enhanced Function to Create Social Buttons
+  const socialStartY = isMobile ? 320 : 360;
+  const socialSpacing = isMobile ? 55 : 50;
 
-  // 🕹️ Hover Character (Moves to hovered buttons)
-  const hoverCharacter = k.add([
-    k.sprite("spritesheet", { anim: "idle-down" }), // Using spritesheet for hover effect
-    k.pos(k.width() / 2 - 200, 220), // Default position (Move left)
-    k.anchor("center"),
-    k.scale(1.4), // Increase scale
-  ]);
+  function createSocialButton(text, index, link, isDisabled = false) {
+    const y = socialStartY + (index * socialSpacing);
+    const btnWidth = isMobile ? k.width() * 0.75 : 350;
+    const btnHeight = isMobile ? 55 : 45;
 
-  // 📌 Function to Create Social Buttons
-  function createSocialButton(text, y, link, isDisabled = false) {
+    // Button border
+    const btnBorder = k.add([
+      k.rect(btnWidth + 4, btnHeight + 4),
+      k.pos(k.width() / 2, y),
+      k.anchor("center"),
+      k.color(isDisabled ? 80 : 100, isDisabled ? 80 : 100, isDisabled ? 80 : 150),
+      k.z(0),
+    ]);
+
+    // Button background
+    const btnBg = k.add([
+      k.rect(btnWidth, btnHeight),
+      k.pos(k.width() / 2, y),
+      k.anchor("center"),
+      k.color(isDisabled ? 50 : 40, isDisabled ? 50 : 40, isDisabled ? 50 : 70),
+      k.area(),
+      k.z(1),
+    ]);
+
     const btn = k.add([
-      k.text(text, { size: 28, color: isDisabled ? k.Color.fromHex("#777777") : k.Color.WHITE }), // Increase size
+      k.text(text, { size: socialSize }),
       k.pos(k.width() / 2, y),
       k.anchor("center"),
       k.area(),
+      k.color(isDisabled ? 120 : 255, isDisabled ? 120 : 255, isDisabled ? 120 : 255),
+      k.z(2),
       "social-btn",
-      { disabled: isDisabled, link },
+      { disabled: isDisabled, link, bg: btnBg, border: btnBorder },
     ]);
 
     btn.onClick(() => {
       if (!btn.disabled) {
+        k.play("interaction-sound");
         window.open(link, "_blank");
       } else {
-        k.shake(2);
+        k.shake(5);
       }
     });
 
-    // 📌 Move character to hovered button + Play animation
+    btnBg.onClick(() => btn.onClick());
+
+    // Enhanced hover effects
     btn.onHover(() => {
-      hoverCharacter.play("walk-side"); // Move animation
-      k.tween(hoverCharacter.pos, k.vec2(k.width() / 2 - 160, y), 0.3, k.easings.easeInOutSine, () => {
-        hoverCharacter.play("idle-down"); // Stop moving after reaching position
-      });
+      if (!btn.disabled) {
+        k.tween(btn.scale.x, 1.05, 0.15, (val) => {
+          btn.scale = k.vec2(val, val);
+          btnBg.scale = k.vec2(val, val);
+          btnBorder.scale = k.vec2(val * 1.02, val * 1.02);
+        });
+        k.tween(btnBg.color.r, 70, 0.2, (val) => btnBg.color.r = val);
+        k.tween(btnBg.color.b, 120, 0.2, (val) => btnBg.color.b = val);
+
+        if (hoverCharacter) {
+          hoverCharacter.play("walk-side");
+          k.tween(hoverCharacter.pos, k.vec2(k.width() / 2 - 200, y), 0.3,
+            k.easings.easeInOutSine, () => {
+            hoverCharacter.play("idle-down");
+          });
+        }
+      }
+    });
+
+    btn.onHoverEnd(() => {
+      if (!btn.disabled) {
+        k.tween(btn.scale.x, 1, 0.15, (val) => {
+          btn.scale = k.vec2(val, val);
+          btnBg.scale = k.vec2(val, val);
+          btnBorder.scale = k.vec2(val * 1.02, val * 1.02);
+        });
+        k.tween(btnBg.color.r, 40, 0.2, (val) => btnBg.color.r = val);
+        k.tween(btnBg.color.b, 70, 0.2, (val) => btnBg.color.b = val);
+      }
     });
 
     return btn;
   }
 
-  createSocialButton("🤖 GitHub", 300, "https://github.com/yourgithub");
-  createSocialButton("💼 LinkedIn", 340, "https://linkedin.com/in/yourlinkedin");
+  createSocialButton("🤖 GitHub", 0, "https://github.com/yourgithub");
+  createSocialButton("💼 LinkedIn", 1, "https://linkedin.com/in/yourlinkedin");
 
   // 🚨 Portfolio Button (Initially Locked)
-  const portfolioBtn = createSocialButton("🔒 Portfolio (Locked)", 380, "https://yourportfolio.com", true);
+  const portfolioBtn = createSocialButton("🔒 Portfolio (Locked)", 2, "https://yourportfolio.com", true);
 
   // Listen for unlocking event
   k.on("unlockPortfolio", () => {
     portfolioBtn.disabled = false;
-    portfolioBtn.use(k.text("🌍 Portfolio (Unlocked!)", { size: 28, color: k.Color.WHITE }));
+    portfolioBtn.text = "🌍 Portfolio (Unlocked!)";
+    portfolioBtn.color = k.Color.WHITE;
+    portfolioBtn.bg.color = k.rgb(40, 40, 70);
+    portfolioBtn.border.color = k.rgb(100, 100, 150);
+  });
+
+  // ⚡ Responsive resize handler
+  k.onResize(() => {
+    k.go("menu"); // Reload menu on resize for proper scaling
   });
 });
 
