@@ -96,23 +96,43 @@
     }
 
     </style>
-    <div id="app">
-      <div>
-        <button id="music-toggle" class="ui-close-btn">Music Off</button>
+<div id="app">
+  <div>
+    <button id="music-toggle" class="ui-close-btn">Music Off</button>
 
-        <div id="textbox-container" style="display: none">
-          <div id="textbox">
-            <p id="dialogue" class="ui-text"></p>
-            <div class="btn-container">
-              <button id="close" class="ui-close-btn">Close</button>
-            </div>
-          </div>
+    <div id="textbox-container" style="display: none">
+      <div id="textbox">
+        <p id="dialogue" class="ui-text"></p>
+        <div class="btn-container">
+          <button id="close" class="ui-close-btn">Close</button>
         </div>
       </div>
-      <canvas id="game"></canvas>
     </div>
+  </div>
+
+  <canvas id="game"></canvas>
+
+  <!-- 🌍 Visitor Counter Image -->
+<!-- 🌍 Visitor Counter (Initially Hidden) -->
+<div id="visitor-counter" style="display: none; position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); text-align: center;">
+  <p style="margin: 0; font-size: 18px;">Visitors Count</p>
+  <img src="https://profile-counter.glitch.me/Ahmedbenabdallah29435/count.svg" alt="Visitor Counter" />
+</div>
+
+
+</div>
+
     <script type="module" src="src/main.js"></script>
-   
+   <!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-H51PDS526K"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  
+  gtag('config', 'G-H51PDS526K'); // Remplace avec ton ID Analytics
+</script>
+
     
     
   </body>
