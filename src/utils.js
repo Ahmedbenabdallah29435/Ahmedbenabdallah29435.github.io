@@ -37,23 +37,9 @@ export function displayDialogue(text, onDisplayEnd) {
 
 export function setCamScale(k) {
   const resizeFactor = k.width() / k.height();
-  const isMobile = k.width() < 768;
-
-  if (isMobile) {
-    // Mobile devices - adjust based on orientation
-    if (resizeFactor < 1) {
-      // Portrait mode
-      k.camScale(k.vec2(0.8));
-    } else {
-      // Landscape mode
-      k.camScale(k.vec2(1.2));
-    }
+  if (resizeFactor < 1) {
+    k.camScale(k.vec2(1));
   } else {
-    // Desktop/tablet
-    if (resizeFactor < 1) {
-      k.camScale(k.vec2(1));
-    } else {
-      k.camScale(k.vec2(1.5));
-    }
+    k.camScale(k.vec2(1.5));
   }
 }
