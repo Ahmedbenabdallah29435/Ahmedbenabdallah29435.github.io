@@ -1,9 +1,6 @@
 import { dialogueData, scaleFactor } from "./constants.js";
 import { k } from "./kaboomCtx.js";
 import { displayDialogue, setCamScale } from "./utils.js";
-import kaboom from 'kaboom';
-
-
 
 k.loadSprite("spritesheet", "./spritesheet.png", {
   sliceX: 39,
@@ -22,163 +19,96 @@ k.loadSprite("map", "./map.png");
 
 k.setBackground(k.Color.fromHex("#a86434"));
 
-const visitorCounter = document.getElementById("visitor-counter");
+// ============ DOM MENU ============
+const menuEl = document.getElementById("menu");
+const startBtn = document.getElementById("start-btn");
+const portfolioBtn = document.getElementById("portfolio-btn");
+const musicToggleBtn = document.getElementById("music-toggle");
 
+const PORTFOLIO_URL = "https://ahmed-ben-abdallah-portfolio.github.io/";
+
+// 🎵 Music state — created lazily on the first user gesture (autoplay policy)
+let music = null;
+let isMusicOn = true;
+
+function startMusic() {
+  if (!music) {
+    music = k.play("background-music", { loop: true, volume: 0.5 });
+  }
+  music.paused = !isMusicOn;
+}
+
+musicToggleBtn.addEventListener("click", () => {
+  isMusicOn = !isMusicOn;
+  if (music) music.paused = !isMusicOn;
+  musicToggleBtn.textContent = isMusicOn ? "🔊" : "🔇";
+  musicToggleBtn.title = isMusicOn ? "Mute music" : "Unmute music";
+});
+
+// ✨ Twinkling starfield background
+const starsContainer = document.querySelector(".menu-stars");
+for (let i = 0; i < 70; i++) {
+  const star = document.createElement("div");
+  const variant = Math.random();
+  star.className =
+    "star" + (variant > 0.85 ? " star--accent" : variant > 0.7 ? " star--cyan" : "");
+  star.style.left = `${Math.random() * 100}%`;
+  star.style.top = `${Math.random() * 100}%`;
+  star.style.setProperty("--dur", `${2 + Math.random() * 4}s`);
+  star.style.setProperty("--delay", `${Math.random() * 4}s`);
+  starsContainer.appendChild(star);
+}
+
+// 🔓 Portfolio unlock (persists across visits once the game is completed)
+function unlockPortfolioButton() {
+  portfolioBtn.classList.remove("menu-btn--locked");
+  portfolioBtn.classList.add("menu-btn--unlocked");
+  portfolioBtn.textContent = "🌍 Portfolio (Unlocked!)";
+}
+
+if (localStorage.getItem("portfolioUnlocked") === "true") {
+  unlockPortfolioButton();
+}
+
+portfolioBtn.addEventListener("click", () => {
+  if (portfolioBtn.classList.contains("menu-btn--unlocked")) {
+    window.open(PORTFOLIO_URL, "_blank");
+  } else {
+    portfolioBtn.classList.remove("shake");
+    void portfolioBtn.offsetWidth; // restart the CSS animation
+    portfolioBtn.classList.add("shake");
+  }
+});
+
+// 🎧 Hover sound on menu buttons (silently ignored until audio is unlocked)
+for (const btn of document.querySelectorAll("#menu .menu-btn")) {
+  btn.addEventListener("mouseenter", () => {
+    try {
+      k.play("hover-sound", { volume: 0.3 });
+    } catch (e) { /* audio not unlocked yet */ }
+  });
+}
+
+startBtn.addEventListener("click", () => {
+  menuEl.classList.add("menu--hidden");
+  musicToggleBtn.classList.add("is-visible");
+  startMusic();
+  k.go("main");
+});
 
 k.scene("menu", () => {
-  visitorCounter.style.display = "block"; // Show counter
+  menuEl.classList.remove("menu--hidden");
+  musicToggleBtn.classList.remove("is-visible");
 
-
-  // 🔥 Google Analytics - Suivi des Visites
+  // 🔥 Google Analytics
   if (typeof gtag === "function") {
-    gtag('event', 'page_view', { page_path: '/menu' });
-  } else {
-    console.warn("Google Analytics not loaded yet!");
-  }
-// 🔥 Sauvegarde locale pour voir le nombre de visiteurs
-let visits = localStorage.getItem("visits") || 0;
-visits++;
-localStorage.setItem("visits", visits);
-console.log(`🌍 Nombre total de visiteurs : ${visits}`);
-
-  // Background and Title
-  k.add([
-    k.rect(k.width(), k.height()), 
-    k.color(30, 30, 30), // Dark background
-    k.pos(0, 0),
-  ]);
-
-  k.add([
-    k.text("🎮2D Portfolio🎮", { size: 48 }),
-    k.pos(k.width() / 2, 80),
-    k.anchor("center"),
-  ]);
-
-  k.add([
-    k.text(
-      "Learn about me through a mini 2D game!\n\nInteract with 5 objects to unlock the real link!",
-      { size: 18, align: "center", width: 300 }
-    ),
-    k.pos(k.width() / 2, 170),
-    k.anchor("center"),
-  ]);
-
-  // 🎮 Start Button
-  const startBtn = k.add([
-    k.text("▶ Start 2D Portfolio", { size: 20 }),
-    k.pos(k.width() / 2,250),
-    k.anchor("center"),
-    k.area(),
-    k.color(255, 255, 255),
-    "start-btn",
-  ]);
-
-  startBtn.onClick(() => k.go("main"));
-
-  // 🔥 Animated Start Button
-  function animateStartButton() {
-    k.loop(1, () => {
-      k.tween(1, 1, 0.9, (val) => startBtn.scale = k.vec2(val, val), k.easings.easeInOutSine, () => {
-        k.tween(1.2, 1, 0.9, (val) => startBtn.scale = k.vec2(val, val), k.easings.easeInOutSine);
-      });
-
-      k.tween(0.5, 1, 0.6, (val) => startBtn.opacity = val, k.easings.easeInOutSine, () => {
-        k.tween(1, 0.5, 0.6, (val) => startBtn.opacity = val, k.easings.easeInOutSine);
-      });
-    });
+    gtag("event", "page_view", { page_path: "/menu" });
   }
 
-  animateStartButton(); // Start infinite animation loop
-// 🌍 Visitors Count (Below Portfolio Button)
-const visitorsCounter = k.add([
-  k.text("▶ (click here)", { size: 18 }),
-  k.pos(k.width() / 2.00, 270),
-  k.anchor("center"),
-  k.area(), // ✅ Makes it clickable
-]);
-
-// ✅ Add click event to open visitor counter image
-visitorsCounter.onClick(() => k.go("main"));
-
-// 🔥 Generalized Animation Function
-function animateElement(element) {
-  k.loop(1, () => {
-    k.tween(1, 1, 0.9, (val) => element.scale = k.vec2(val, val), k.easings.easeInOutSine, () => {
-      k.tween(1.2, 1, 0.9, (val) => element.scale = k.vec2(val, val), k.easings.easeInOutSine);
-    });
-
-    k.tween(0.5, 1, 0.6, (val) => element.opacity = val, k.easings.easeInOutSine, () => {
-      k.tween(1, 0.5, 0.6, (val) => element.opacity = val, k.easings.easeInOutSine);
-    });
-  });
-}
-// 🔥 Apply animation to visitorsCounter
-animateElement(visitorsCounter);
-
-  // 🕹️ Hover Character (Moves to hovered buttons)
-  const hoverCharacter = k.add([
-    k.sprite("spritesheet", { anim: "idle-down" }), // Using spritesheet for hover effect
-    k.pos(k.width() / 2 - 140, 248), // Default position (Move left)
-    k.anchor("center"),
-    k.scale(1.4), // Increase scale
-  ]);
-  function createSocialButton(text, y, link, isDisabled = false) {
-    const btn = k.add([
-        k.text(text, { size: 28, color: isDisabled ? k.Color.fromHex("#777777") : k.Color.WHITE }),
-        k.pos(k.width() / 2, y),
-        k.anchor("center"),
-        k.area(),
-        "social-btn",
-        { disabled: isDisabled, link },
-    ]);
-
-    // 🌟 **Add a Glow Effect (Hidden Initially)**
-    const glowEffect = k.add([
-        k.text(text, { size: 30, color: k.Color.YELLOW }), // Slightly bigger
-        k.pos(k.width() / 2, y),
-        k.anchor("center"),
-        k.scale(1.1), // Slightly larger
-        k.opacity(0), // Hidden initially
-    ]);
-
-    btn.onClick(() => {
-        if (!btn.disabled) {
-            window.open(link, "_blank");
-        } else {
-            k.shake(5);
-        }
-    });
-
-    // **🎵 Play Hover Sound & Show Glow Effect**
-    btn.onHover(() => {
-        k.play("hover-sound"); // Play hover sound
-        glowEffect.opacity = 0.09; // Instantly show glow effect
-    });
-
-    // **🛑 Hide Glow When Not Hovered**
-    btn.onHoverEnd(() => {
-        glowEffect.opacity = 0; // Instantly hide glow effect
-    });
-
-    return btn;
-}
-
-
-
-
-  createSocialButton("🤖 GitHub", 320, "https://github.com/Ahmedbenabdallah29435/");
-  createSocialButton("💼 LinkedIn", 360, "https://www.linkedin.com/in/benabdallah-ahmed-928199215/");
-
-  // 🚨 Portfolio Button (Initially Locked)
-  const portfolioBtn = createSocialButton("🔒 Portfolio (Locked)", 400, "https://yourportfolio.com", true);
-
-  // Listen for unlocking event
-  k.on("unlockPortfolio", () => {
-    portfolioBtn.disabled = false;
-    portfolioBtn.use(k.text("🌍 Portfolio (Unlocked!)", { size: 28, color: k.Color.WHITE }));
-  });
-
-
+  // 🔥 Local visit counter
+  let visits = Number(localStorage.getItem("visits") || 0) + 1;
+  localStorage.setItem("visits", visits);
+  console.log(`🌍 Nombre total de visiteurs : ${visits}`);
 });
 
 
@@ -190,25 +120,6 @@ animateElement(visitorsCounter);
 
 
 k.scene("main", async () => {
-  let isMusicOn = true; // Track music state
-
-   const music = k.play("background-music", {
-     loop: true,
-     volume: 0.5,
-   });
-   if (visitorCounter) visitorCounter.style.display = "none"; // ✅ Ensure it's hidden in main game
-
-  const musicToggleBtn = document.getElementById("music-toggle");
-  musicToggleBtn.addEventListener("click", () => {
-    isMusicOn = !isMusicOn;
-    if (isMusicOn) {
-      music.play();
-      musicToggleBtn.textContent = "Music Off";
-    } else {
-      music.stop();
-      musicToggleBtn.textContent = "Music On";
-    }
-  });
   const mapData = await (await fetch("./map.json")).json();
   const layers = mapData.layers;
 
@@ -329,6 +240,8 @@ k.scene("main", async () => {
         }
 
         console.log("✅ Removing blocker, access granted!");
+        localStorage.setItem("portfolioUnlocked", "true"); // 🔓 Unlock the menu portfolio button
+        unlockPortfolioButton();
         newAreaBlocker.destroy(); // Remove the blocker
     } else {
         const remaining = 5 - player.interactions;
