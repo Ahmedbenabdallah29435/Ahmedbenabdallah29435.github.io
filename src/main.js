@@ -115,26 +115,35 @@ portfolioBtn.addEventListener("click", () => {
 });
 
 const backToMenuBtn = document.getElementById("back-to-menu");
+let gameStarted = false;
 
 startBtn.addEventListener("click", () => {
   menuEl.classList.add("menu--hidden");
   musicToggleBtn.classList.add("is-visible");
   backToMenuBtn.classList.add("is-visible");
   if (liquidEther) liquidEther.pause(); // don't burn GPU behind the game
-  startMusic();
-  k.go("main");
+
+  if (!gameStarted) {
+    gameStarted = true;
+    startMusic();
+    k.go("main");
+  } else {
+    k.debug.paused = false; // resume the frozen game — audio comes back with it
+  }
 });
 
 backToMenuBtn.addEventListener("click", () => {
-  document.getElementById("textbox-container").style.display = "none"; // close any open dialogue
-  k.go("menu");
+  document.getElementById("close").click(); // close any open dialogue cleanly
+  k.debug.paused = true; // freezes the game loop and suspends all audio
+  startBtn.textContent = "▶ Resume Adventure";
+  menuEl.classList.remove("menu--hidden");
+  backToMenuBtn.classList.remove("is-visible");
+  musicToggleBtn.classList.remove("is-visible");
+  if (liquidEther) liquidEther.start();
 });
 
 k.scene("menu", () => {
-  menuEl.classList.remove("menu--hidden");
-  backToMenuBtn.classList.remove("is-visible");
-  if (!music) musicToggleBtn.classList.remove("is-visible"); // keep toggle if music already playing
-  if (liquidEther) liquidEther.start();
+  // Boot scene — the DOM menu overlay is already visible; Start launches "main"
 });
 
 
