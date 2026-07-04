@@ -72,14 +72,26 @@ if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
   }
 }
 
-// 🌍 Visitor badge — fall back to the local visit count if the service is down
-const visitorBadge = document.getElementById("visitor-badge");
-const visitorFallback = document.getElementById("visitor-fallback");
-visitorBadge.addEventListener("error", () => {
-  visitorBadge.style.display = "none"; // .menu-footer img display rule beats [hidden]
-  visitorFallback.hidden = false;
-  visitorFallback.textContent = localStorage.getItem("visits") || "1";
-});
+// 🔥 Local visit count + analytics (once per page load, not per menu visit)
+const visits = Number(localStorage.getItem("visits") || 0) + 1;
+localStorage.setItem("visits", visits);
+console.log(`🌍 Nombre total de visiteurs : ${visits}`);
+if (typeof gtag === "function") {
+  gtag("event", "page_view", { page_path: "/menu" });
+}
+
+// 🌍 Global visitor counter — falls back to the local count if the API is down
+const visitorCount = document.getElementById("visitor-count");
+fetch("https://abacus.jasoncameron.dev/hit/ahmedbenabdallah29435.github.io/visits")
+  .then((res) => res.json())
+  .then((data) => {
+    visitorCount.textContent = data.value;
+  })
+  .catch(() => {
+    visitorCount.textContent = visits;
+  });
+
+document.getElementById("copyright-year").textContent = new Date().getFullYear();
 
 // 🔓 Portfolio unlock (persists across visits once the game is completed)
 function unlockPortfolioButton() {
@@ -102,37 +114,27 @@ portfolioBtn.addEventListener("click", () => {
   }
 });
 
-// 🎧 Hover sound on menu buttons (silently ignored until audio is unlocked)
-for (const btn of document.querySelectorAll("#menu .menu-btn")) {
-  btn.addEventListener("mouseenter", () => {
-    try {
-      k.play("hover-sound", { volume: 0.3 });
-    } catch (e) { /* audio not unlocked yet */ }
-  });
-}
+const backToMenuBtn = document.getElementById("back-to-menu");
 
 startBtn.addEventListener("click", () => {
   menuEl.classList.add("menu--hidden");
   musicToggleBtn.classList.add("is-visible");
+  backToMenuBtn.classList.add("is-visible");
   if (liquidEther) liquidEther.pause(); // don't burn GPU behind the game
   startMusic();
   k.go("main");
 });
 
+backToMenuBtn.addEventListener("click", () => {
+  document.getElementById("textbox-container").style.display = "none"; // close any open dialogue
+  k.go("menu");
+});
+
 k.scene("menu", () => {
   menuEl.classList.remove("menu--hidden");
-  musicToggleBtn.classList.remove("is-visible");
+  backToMenuBtn.classList.remove("is-visible");
+  if (!music) musicToggleBtn.classList.remove("is-visible"); // keep toggle if music already playing
   if (liquidEther) liquidEther.start();
-
-  // 🔥 Google Analytics
-  if (typeof gtag === "function") {
-    gtag("event", "page_view", { page_path: "/menu" });
-  }
-
-  // 🔥 Local visit counter
-  let visits = Number(localStorage.getItem("visits") || 0) + 1;
-  localStorage.setItem("visits", visits);
-  console.log(`🌍 Nombre total de visiteurs : ${visits}`);
 });
 
 
@@ -144,6 +146,8 @@ k.scene("menu", () => {
 
 
 k.scene("main", async () => {
+  let hasCelebrated = false; // confetti fires once per playthrough
+
   const mapData = await (await fetch("./map.json")).json();
   const layers = mapData.layers;
 
@@ -195,6 +199,10 @@ k.scene("main", async () => {
           player.onCollide(boundary.name, () => {
             if (!player.isInDialogue) {
               player.isInDialogue = true;
+              if (boundary.name === "pc2" && !hasCelebrated) {
+                hasCelebrated = true;
+                spawnConfetti(); // 🎉 reached the final reward
+              }
               displayDialogue(dialogueData[boundary.name], () => {
                 player.isInDialogue = false;
                 if (!player.interactedObjects.has(boundary.name) && boundary.name !== "newarea") {
@@ -208,8 +216,9 @@ k.scene("main", async () => {
                   
                   if (player.interactions >= 5 && newAreaBoundary) {
                     console.log("✅ Removing boundary, access granted!");
-                
+
                     flashScreen(); // 🌟 Apply Flash Effect when unlocking the new area
+                    showUnlockBanner("DOOR UNLOCKED!");
                     newAreaBoundary.destroy();
                     newAreaBoundary = null;
                   }
@@ -371,8 +380,69 @@ k.scene("main", async () => {
     k.wait(0.1, () => {
       k.tween(1, 0, 1, (val) => (flash.opacity = val), k.easings.easeOutQuad);
     });
-  
+
     k.shake(5);
+  }
+
+  // 🔓 Big animated banner shown when the new area unlocks
+  function showUnlockBanner(msg) {
+    const banner = k.add([
+      k.text(msg, { size: 48 }),
+      k.pos(k.width() / 2, k.height() / 2 - 120),
+      k.anchor("center"),
+      k.fixed(),
+      k.z(100),
+      k.color(255, 209, 102),
+      k.opacity(0),
+      k.scale(0.5),
+    ]);
+
+    k.tween(0, 1, 0.35, (v) => (banner.opacity = v), k.easings.easeOutQuad);
+    k.tween(0.5, 1, 0.5, (v) => (banner.scale = k.vec2(v, v)), k.easings.easeOutBack);
+
+    k.wait(2.2, () => {
+      k.tween(1, 0, 0.6, (v) => (banner.opacity = v), k.easings.easeInQuad).then(() =>
+        banner.destroy()
+      );
+    });
+  }
+
+  // 🎉 Confetti burst for reaching the final reward
+  function spawnConfetti() {
+    const palette = [
+      [255, 209, 102],
+      [78, 205, 196],
+      [255, 107, 107],
+      [199, 125, 255],
+      [255, 159, 252],
+    ];
+
+    for (let i = 0; i < 120; i++) {
+      const c = palette[Math.floor(Math.random() * palette.length)];
+      const piece = k.add([
+        k.rect(k.rand(4, 9), k.rand(4, 9)),
+        k.color(c[0], c[1], c[2]),
+        k.pos(k.rand(0, k.width()), k.rand(-80, -10)),
+        k.anchor("center"),
+        k.fixed(),
+        k.z(99),
+        k.opacity(1),
+        k.rotate(k.rand(0, 360)),
+        k.lifespan(k.rand(2, 3.5), { fade: 0.5 }),
+        {
+          vx: k.rand(-70, 70),
+          vy: k.rand(100, 260),
+          vr: k.rand(-240, 240),
+        },
+      ]);
+
+      piece.onUpdate(() => {
+        piece.pos.x += piece.vx * k.dt();
+        piece.pos.y += piece.vy * k.dt();
+        piece.angle += piece.vr * k.dt();
+        piece.vy += 220 * k.dt(); // gravity
+      });
+    }
   }
   
   
