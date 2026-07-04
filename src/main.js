@@ -1,6 +1,7 @@
 import { dialogueData, scaleFactor } from "./constants.js";
 import { k } from "./kaboomCtx.js";
 import { displayDialogue, setCamScale } from "./utils.js";
+import { createLiquidEther } from "./liquidEther.js";
 
 k.loadSprite("spritesheet", "./spritesheet.png", {
   sliceX: 39,
@@ -45,19 +46,40 @@ musicToggleBtn.addEventListener("click", () => {
   musicToggleBtn.title = isMusicOn ? "Mute music" : "Unmute music";
 });
 
-// ✨ Twinkling starfield background
-const starsContainer = document.querySelector(".menu-stars");
-for (let i = 0; i < 70; i++) {
-  const star = document.createElement("div");
-  const variant = Math.random();
-  star.className =
-    "star" + (variant > 0.85 ? " star--accent" : variant > 0.7 ? " star--cyan" : "");
-  star.style.left = `${Math.random() * 100}%`;
-  star.style.top = `${Math.random() * 100}%`;
-  star.style.setProperty("--dur", `${2 + Math.random() * 4}s`);
-  star.style.setProperty("--delay", `${Math.random() * 4}s`);
-  starsContainer.appendChild(star);
+// 🌊 Liquid fluid background (WebGL) — skipped for reduced-motion users
+let liquidEther = null;
+if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  try {
+    liquidEther = createLiquidEther(document.querySelector(".menu-bg"), {
+      colors: ["#5227FF", "#FF9FFC", "#B497CF"],
+      mouseForce: 20,
+      cursorSize: 100,
+      isViscous: true,
+      viscous: 30,
+      iterationsViscous: 32,
+      iterationsPoisson: 32,
+      resolution: 0.5,
+      isBounce: false,
+      autoDemo: true,
+      autoSpeed: 0.5,
+      autoIntensity: 2.2,
+      takeoverDuration: 0.25,
+      autoResumeDelay: 3000,
+      autoRampDuration: 0.6,
+    });
+  } catch (e) {
+    console.warn("Liquid background unavailable, keeping gradient:", e);
+  }
 }
+
+// 🌍 Visitor badge — fall back to the local visit count if the service is down
+const visitorBadge = document.getElementById("visitor-badge");
+const visitorFallback = document.getElementById("visitor-fallback");
+visitorBadge.addEventListener("error", () => {
+  visitorBadge.style.display = "none"; // .menu-footer img display rule beats [hidden]
+  visitorFallback.hidden = false;
+  visitorFallback.textContent = localStorage.getItem("visits") || "1";
+});
 
 // 🔓 Portfolio unlock (persists across visits once the game is completed)
 function unlockPortfolioButton() {
@@ -92,6 +114,7 @@ for (const btn of document.querySelectorAll("#menu .menu-btn")) {
 startBtn.addEventListener("click", () => {
   menuEl.classList.add("menu--hidden");
   musicToggleBtn.classList.add("is-visible");
+  if (liquidEther) liquidEther.pause(); // don't burn GPU behind the game
   startMusic();
   k.go("main");
 });
@@ -99,6 +122,7 @@ startBtn.addEventListener("click", () => {
 k.scene("menu", () => {
   menuEl.classList.remove("menu--hidden");
   musicToggleBtn.classList.remove("is-visible");
+  if (liquidEther) liquidEther.start();
 
   // 🔥 Google Analytics
   if (typeof gtag === "function") {
