@@ -276,9 +276,16 @@
 
       .menu-hint kbd {
         font-family: inherit;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.5em;
+        height: 1.5em;
+        margin: 0 0.1em;
+        line-height: 1;
+        vertical-align: middle;
         border: 1px solid rgba(255, 255, 255, 0.25);
         border-radius: 4px;
-        padding: 0 0.35rem;
         background: rgba(255, 255, 255, 0.06);
       }
 
@@ -300,10 +307,19 @@
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
       }
 
-      .menu-footer img {
-        max-height: 22px;
-        display: block;
-        border-radius: 4px;
+      #visitor-count {
+        color: var(--accent);
+        min-width: 1.5em;
+        text-align: center;
+      }
+
+      .menu-copyright {
+        position: relative;
+        z-index: 1;
+        margin: -0.5rem 0 0;
+        font-size: 1rem;
+        color: var(--text-dim);
+        opacity: 0.7;
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -358,10 +374,9 @@
         margin-top: 1rem;
       }
 
-      #music-toggle {
+      .hud-btn {
         position: fixed;
         top: 14px;
-        right: 14px;
         z-index: 40;
         width: 52px;
         height: 52px;
@@ -378,13 +393,16 @@
         transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
       }
 
-      #music-toggle:hover {
+      .hud-btn:hover {
         transform: scale(1.08);
         border-color: var(--accent);
         box-shadow: 0 0 16px var(--accent-soft);
       }
 
-      #music-toggle.is-visible { display: inline-flex; }
+      .hud-btn.is-visible { display: inline-flex; }
+
+      #music-toggle { right: 14px; }
+      #back-to-menu { left: 14px; }
     </style>
 
     <div id="app">
@@ -416,17 +434,15 @@
 
         <div class="menu-footer" id="visitor-counter">
           <span>👁 Visitors</span>
-          <img
-            id="visitor-badge"
-            src="https://komarev.com/ghpvc/?username=ahmedbenabdallah29435&label=&color=5227ff&style=flat-square"
-            alt="Visitor counter"
-          />
-          <span id="visitor-fallback" hidden></span>
+          <span id="visitor-count">…</span>
         </div>
+
+        <p class="menu-copyright">© <span id="copyright-year">2026</span> ABA — All Rights Reserved</p>
       </div>
 
       <!-- ============ IN-GAME OVERLAYS ============ -->
-      <button id="music-toggle" aria-label="Toggle music" title="Toggle music">🔊</button>
+      <button id="back-to-menu" class="hud-btn" aria-label="Back to menu" title="Back to menu">🏠</button>
+      <button id="music-toggle" class="hud-btn" aria-label="Toggle music" title="Toggle music">🔊</button>
 
       <div id="textbox-container">
         <div id="textbox">

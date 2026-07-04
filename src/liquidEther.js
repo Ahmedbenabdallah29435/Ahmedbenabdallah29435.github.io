@@ -65,7 +65,7 @@ export function createLiquidEther(
       this.delta = 0;
       this.container = null;
       this.renderer = null;
-      this.clock = null;
+      this.lastTime = 0;
     }
     init(el) {
       this.container = el;
@@ -79,8 +79,7 @@ export function createLiquidEther(
       this.renderer.domElement.style.width = "100%";
       this.renderer.domElement.style.height = "100%";
       this.renderer.domElement.style.display = "block";
-      this.clock = new THREE.Clock();
-      this.clock.start();
+      this.lastTime = performance.now();
     }
     resize() {
       if (!this.container) return;
@@ -91,7 +90,9 @@ export function createLiquidEther(
       if (this.renderer) this.renderer.setSize(this.width, this.height, false);
     }
     update() {
-      this.delta = this.clock.getDelta();
+      const now = performance.now();
+      this.delta = Math.min((now - this.lastTime) / 1000, 0.1);
+      this.lastTime = now;
       this.time += this.delta;
     }
   }
